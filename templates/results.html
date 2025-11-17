@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-3">
+  <a href="/" class="btn btn-outline-secondary btn-sm">← Run again</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h4 class="mb-3">Results for {{ ticker1 }} / {{ ticker2 }}</h4>
+    <div class="row">
+      <div class="col-md-3">
+        <div class="stat-box">
+          <div class="stat-label">Model Accuracy</div>
+          <div class="stat-value">{{ model_accuracy }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-box">
+          <div class="stat-label">Sharpe Ratio</div>
+          <div class="stat-value">{{ sharpe }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-box">
+          <div class="stat-label">Total Return</div>
+          <div class="stat-value">{{ total_return }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-box">
+          <div class="stat-label">Max Drawdown</div>
+          <div class="stat-value">{{ max_drawdown }}</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-3 mb-3">Estimated hedge ratio β ≈ {{ beta }}</p>
+    
+    <a class="btn btn-primary" href="/live?t1={{ ticker1 }}&t2={{ ticker2 }}">
+      🔴 Open Live AI Signal Dashboard
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="mb-3">Price Series</h5>
+    <img class="img-fluid" src="data:image/png;base64,{{ price_img }}">
+  </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="mb-3">Spread and Z-score</h5>
+    <img class="img-fluid" src="data:image/png;base64,{{ spread_img }}">
+  </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="mb-3">Equity Curve</h5>
+    <img class="img-fluid" src="data:image/png;base64,{{ equity_img }}">
+  </div>
+</div>
+{% endblock %}

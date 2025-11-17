@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h4 class="mb-3">Run AI-Enhanced Pairs Strategy</h4>
+    
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <div class="row mb-3">
+
+        <div class="col-md-3">
+          <label class="form-label">Ticker 1</label>
+          <input type="text" class="form-control" name="ticker1" placeholder="AAPL">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Ticker 2</label>
+          <input type="text" class="form-control" name="ticker2" placeholder="MSFT">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Period</label>
+          <select class="form-select" name="period">
+            <option value="3mo">3 Months</option>
+            <option value="6mo" selected>6 Months</option>
+            <option value="1y">1 Year</option>
+            <option value="2y">2 Years</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Interval</label>
+          <select class="form-select" name="interval">
+            <option value="1d" selected>Daily</option>
+            <option value="1h">Hourly</option>
+            <option value="30m">30 Minutes</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Run Strategy</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

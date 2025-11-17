@@ -1,0 +1,8 @@
+flask
+pandas
+numpy
+yfinance
+scikit-learn
+matplotlib
+pymongo
+flask-bcrypt

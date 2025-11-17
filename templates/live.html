@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card p-4 shadow-sm">
+  <h3>Live AI Trading Signal</h3>
+
+  <div id="signal-box" class="p-4 mb-3" style="font-size:24px; font-weight:bold;">
+    Loading...
+  </div>
+
+  <p>Latest Z-score: <strong id="z"></strong></p>
+  <p>Prediction Prob: <strong id="prob"></strong></p>
+  <p>Last Price {{ ticker1 }}: <strong id="p1"></strong></p>
+  <p>Last Price {{ ticker2 }}: <strong id="p2"></strong></p>
+
+  <p class="text-muted mt-3">Updating every 5 seconds...</p>
+</div>
+
+<script>
+let t1 = "{{ ticker1 }}";
+let t2 = "{{ ticker2 }}";
+
+async function updateLive() {
+  const res = await fetch(`/live_data?t1=${t1}&t2=${t2}`);
+  const data = await res.json();
+
+  if (data.error) {
+    document.getElementById("signal-box").innerText = data.error;
+    return;
+  }
+
+  document.getElementById("z").innerText = data.zscore;
+  document.getElementById("prob").innerText = data.prob;
+  document.getElementById("p1").innerText = data.price1;
+  document.getElementById("p2").innerText = data.price2;
+
+  let box = document.getElementById("signal-box");
+  box.innerText = data.signal;
+
+  if (data.signal === "LONG") {
+    box.style.background = "#D4FFE3";
+    box.style.color = "#006B2D";
+  }
+  else if (data.signal === "SHORT") {
+    box.style.background = "#FFD7D7";
+    box.style.color = "#820000";
+  }
+  else {
+    box.style.background = "#EEE";
+    box.style.color = "#333";
+  }
+}
+
+setInterval(updateLive, 5000);
+updateLive();
+</script>
+
+{% endblock %}
