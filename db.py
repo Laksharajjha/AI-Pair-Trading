@@ -1,9 +1,9 @@
+import os
 from pymongo import MongoClient
 
-MONGO_URI = "mongodb+srv://laksharajjha:9863173888@aipairtrading01.1qymhum.mongodb.net/?appName=AIPAIRTRADING01"
+MONGO_URI = os.environ.get("MONGO_URI")
 
 client = MongoClient(MONGO_URI)
 db = client["pairs_trading"]
-
-users_col = db["users"]
-strategies_col = db["strategies"]
+users = db["users"]
+strategies = db["strategies"]
