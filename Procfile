@@ -1,0 +1,1 @@
+web: gunicorn --chdir ai_pairs_trading app:app --bind 0.0.0.0:$PORT
