@@ -91,17 +91,30 @@ def index():
 @app.route("/run", methods=["GET", "POST"])
 @login_required
 def run_single():
-    result = None
-
     if request.method == "POST":
         t1 = request.form.get("ticker1") or "AAPL"
         t2 = request.form.get("ticker2") or "MSFT"
         period = request.form.get("period") or "6mo"
         interval = request.form.get("interval") or "1d"
 
-        result = run_strategy(t1, t2, period, interval)
+        r = run_strategy(t1, t2, period, interval)
 
-    return render_template("results.html", result=result)
+        return render_template(
+            "results.html",
+            ticker1=t1,
+            ticker2=t2,
+            model_accuracy=round(r["model_accuracy"], 3),
+            sharpe=round(r["stats"]["sharpe"], 3),
+            max_drawdown=round(r["stats"]["max_drawdown"], 3),
+            total_return=round(r["stats"]["total_return"], 3),
+            price_img=r["price_img"],
+            equity_img=r["equity_img"],
+            spread_img=r["spread_img"],
+            beta=round(r["beta"], 3),
+        )
+
+    # GET request — show input UI
+    return render_template("run.html")
 
 
 
