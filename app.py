@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, session, make_respo
 from flask_bcrypt import Bcrypt
 from functools import wraps
 from db import users_col, strategies_col
-from strategy import run_backtest
+from strategy import run_backtest, run_strategy
 import os
 import io
 import csv
@@ -23,21 +23,16 @@ def login_required(f):
     return wrapper
 
 
-# ---------- HOME + BATCH BACKTEST ----------
+# ---------- HOME = BATCH BACKTEST ----------
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        # Require login only when actually running backtests
         if "user" not in session:
             return redirect("/login")
 
         pairs_raw = request.form.get("pairs", "").strip()
         if not pairs_raw:
-            return render_template(
-                "index.html",
-                results=[],
-                error="Please enter at least one pair."
-            )
+            return render_template("index.html", results=[], error="Enter pairs.")
 
         pairs = [p for p in pairs_raw.splitlines() if "," in p]
 
@@ -52,8 +47,7 @@ def index():
             t1, t2 = [x.strip() for x in line.split(",")]
             try:
                 out = run_backtest(
-                    t1,
-                    t2,
+                    t1, t2,
                     strategy_type=strategy_type,
                     z_entry=z_entry,
                     prob_threshold=prob_threshold,
@@ -74,26 +68,50 @@ def index():
                 })
 
         valid = [r for r in results if r.get("total_return") is not None]
-        if valid:
-            portfolio_return = sum(r["total_return"] for r in valid)
-            avg_sharpe = sum(r["sharpe"] for r in valid) / len(valid)
-        else:
-            portfolio_return = 0.0
-            avg_sharpe = 0.0
 
-        # store in session for CSV export
+        portfolio_return = sum(r["total_return"] for r in valid) if valid else 0.0
+        avg_sharpe = (sum(r["sharpe"] for r in valid) / len(valid)) if valid else 0.0
+
         session["last_results"] = results
 
         return render_template(
             "index.html",
             results=results,
-            portfolio={"portfolio_return": round(portfolio_return, 3),
-                       "avg_sharpe": round(avg_sharpe, 3)}
+            portfolio={
+                "portfolio_return": round(portfolio_return, 3),
+                "avg_sharpe": round(avg_sharpe, 3)
+            }
         )
 
-    # GET: just render empty page
     return render_template("index.html", results=None, portfolio=None)
-    
+
+
+
+# ---------- RUN STRATEGY: CHARTS & STATS ----------
+@app.route("/run", methods=["GET", "POST"])
+@login_required
+def run_single():
+    result = None
+
+    if request.method == "POST":
+        t1 = request.form.get("ticker1") or "AAPL"
+        t2 = request.form.get("ticker2") or "MSFT"
+        period = request.form.get("period") or "6mo"
+        interval = request.form.get("interval") or "1d"
+
+        result = run_strategy(t1, t2, period, interval)
+
+    return render_template("results.html", result=result)
+
+
+
+# ---------- LIVE SIGNALS (placeholder) ----------
+@app.route("/live")
+@login_required
+def live():
+    return render_template("live.html")
+
+
 
 # ---------- SIGNUP ----------
 @app.route("/signup", methods=["GET", "POST"])
@@ -103,7 +121,7 @@ def signup():
         password = request.form["password"]
 
         if users_col.find_one({"email": email}):
-            return render_template("signup.html", error="Email already registered")
+            return render_template("signup.html", error="Email exists")
 
         hashed = bcrypt.generate_password_hash(password).decode("utf-8")
         users_col.insert_one({"email": email, "password": hashed})
@@ -111,6 +129,7 @@ def signup():
         return redirect("/login")
 
     return render_template("signup.html")
+
 
 
 # ---------- LOGIN ----------
@@ -133,12 +152,14 @@ def login():
     return render_template("login.html")
 
 
+
 # ---------- LOGOUT ----------
 @app.route("/logout")
 @login_required
 def logout():
     session.clear()
     return redirect("/login")
+
 
 
 # ---------- SAVE STRATEGY CONFIG ----------
@@ -157,6 +178,7 @@ def save_strategy():
     return redirect("/strategies")
 
 
+
 # ---------- VIEW SAVED STRATEGIES ----------
 @app.route("/strategies")
 @login_required
@@ -165,13 +187,14 @@ def strategies():
     return render_template("saved.html", strategies=rows)
 
 
+
 # ---------- EXPORT CSV ----------
 @app.route("/export_csv")
 @login_required
 def export_csv():
     results = session.get("last_results", [])
     if not results:
-        return "No results to export", 400
+        return "No results", 400
 
     si = io.StringIO()
     writer = csv.writer(si)
@@ -190,15 +213,17 @@ def export_csv():
         ])
 
     output = make_response(si.getvalue())
-    output.headers["Content-Disposition"] = "attachment; filename=backtest_results.csv"
+    output.headers["Content-Disposition"] = "attachment; filename=results.csv"
     output.headers["Content-Type"] = "text/csv"
     return output
+
 
 
 # ---------- HEALTH ----------
 @app.route("/health")
 def health():
     return "ok", 200
+
 
 
 if __name__ == "__main__":
