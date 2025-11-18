@@ -1,54 +1,55 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card shadow-sm p-4 mx-auto" style="max-width: 900px;">
-  <h3 class="mb-4 text-center">📊 Pair Trading Results</h3>
+{% if not result %}
+<div class="text-center text-muted">Run a strategy to see results.</div>
+{% else %}
 
-  {% if result %}
-  <div class="row text-center mb-4">
-    <div class="col">
+<h3 class="mb-3">📊 Pair Trading Results</h3>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card p-3">
       <h6>Sharpe</h6>
-      <b>{{ result.stats.sharpe | round(3) }}</b>
+      <h4>{{ result.stats.sharpe }}</h4>
     </div>
-    <div class="col">
-      <h6>Return</h6>
-      <b>{{ result.stats.total_return | round(3) }}</b>
-    </div>
-    <div class="col">
-      <h6>Drawdown</h6>
-      <b>{{ result.stats.max_drawdown | round(3) }}</b>
-    </div>
-    <div class="col">
-      <h6>Accuracy</h6>
-      <b>{{ result.model_accuracy | round(3) }}</b>
-    </div>
-    <div class="col">
-      <h6>β Hedge</h6>
-      <b>{{ result.beta | round(3) }}</b>
+  </div>
+  <div class="col-md-6">
+    <div class="card p-3">
+      <h6>Total Return</h6>
+      <h4>{{ result.stats.total_return }}</h4>
     </div>
   </div>
 
-  <hr>
-
-  <h5 class="mt-4">Price Chart</h5>
-  <img src="data:image/png;base64,{{ result.price_img }}" class="img-fluid mb-4">
-
-  <h5>Equity Curve</h5>
-  <img src="data:image/png;base64,{{ result.equity_img }}" class="img-fluid mb-4">
-
-  <h5>Spread vs Z-score</h5>
-  <img src="data:image/png;base64,{{ result.spread_img }}" class="img-fluid mb-4">
-
-  {% else %}
-  <div class="alert alert-info text-center">
-    Run a strategy to see results.
-  </div>
-  {% endif %}
-
-  <div class="text-center mt-3">
-    <a href="/" class="btn btn-outline-primary">⬅ Back</a>
+  <div class="col-md-6">
+    <div class="card p-3">
+      <h6>Max Drawdown</h6>
+      <h4>{{ result.stats.max_drawdown }}</h4>
+    </div>
   </div>
 
+  <div class="col-md-6">
+    <div class="card p-3">
+      <h6>ML Accuracy</h6>
+      <h4>{{ result.model_accuracy }}</h4>
+    </div>
+  </div>
 </div>
 
+<hr>
+
+<h5>β Hedge = {{ result.beta }}</h5>
+
+<hr>
+
+<h5>Price Chart</h5>
+<img class="img-fluid" src="data:image/png;base64,{{ result.price_img }}">
+
+<h5 class="mt-4">Equity Curve</h5>
+<img class="img-fluid" src="data:image/png;base64,{{ result.equity_img }}">
+
+<h5 class="mt-4">Spread vs Z-Score</h5>
+<img class="img-fluid" src="data:image/png;base64,{{ result.spread_img }}">
+
+{% endif %}
 {% endblock %}

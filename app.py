@@ -97,6 +97,7 @@ def run_single():
         period = request.form.get("period") or "6mo"
         interval = request.form.get("interval") or "1d"
 
+        print("RUN STRATEGY RESULT:", r)
         r = run_strategy(t1, t2, period, interval)
 
         return render_template(

@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card shadow-sm p-4 mx-auto" style="max-width: 650px;">
-  <h3 class="mb-4 text-center">Run Pair-Trade Strategy</h3>
+<div class="card shadow-sm p-4 mx-auto" style="max-width:600px;">
+  <h3 class="mb-3 text-center">Run Single Strategy</h3>
 
-  <form method="POST" class="row g-3">
-
+  <form method="POST" action="/run" class="row g-3">
     <div class="col-md-6">
-      <label class="form-label fw-semibold">Ticker 1</label>
+      <label class="form-label">Ticker 1</label>
       <input class="form-control" name="ticker1" value="AAPL">
     </div>
 
     <div class="col-md-6">
-      <label class="form-label fw-semibold">Ticker 2</label>
+      <label class="form-label">Ticker 2</label>
       <input class="form-control" name="ticker2" value="MSFT">
     </div>
 
@@ -20,7 +19,7 @@
       <label class="form-label">Period</label>
       <select name="period" class="form-select">
         <option value="3mo">3 Months</option>
-        <option value="6mo" selected>6 Months</option>
+        <option selected value="6mo">6 Months</option>
         <option value="1y">1 Year</option>
       </select>
     </div>
@@ -28,7 +27,7 @@
     <div class="col-md-6">
       <label class="form-label">Interval</label>
       <select name="interval" class="form-select">
-        <option value="1d">Daily</option>
+        <option value="1d" selected>Daily</option>
         <option value="1wk">Weekly</option>
       </select>
     </div>
@@ -38,7 +37,6 @@
         Run Strategy 🚀
       </button>
     </div>
-
   </form>
 </div>
 
