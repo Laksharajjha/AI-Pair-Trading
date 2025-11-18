@@ -1,8 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card shadow-sm p-4 mb-4" style="max-width: 800px; margin:auto;">
-  <h3 class="mb-3">📊 Run Single Pair Strategy</h3>
+{% if result %}
+<div class="card shadow-sm p-4">
+
+  <h3 class="mb-4 text-center">📊 Pair Trading Results</h3>
+
+  <table class="table table-bordered text-center">
+    <tr><th>Sharpe</th><td>{{ result.stats.sharpe|round(3) }}</td></tr>
+    <tr><th>Return</th><td>{{ result.stats.total_return|round(3) }}</td></tr>
+    <tr><th>Drawdown</th><td>{{ result.stats.max_drawdown|round(3) }}</td></tr>
+    <tr><th>Accuracy</th><td>{{ result.model_accuracy|round(3) }}</td></tr>
+    <tr><th>β Hedge</th><td>{{ result.beta|round(3) }}</td></tr>
+  </table>
+
+  <hr>
+
+  <h5>Price Chart</h5>
+  <img src="data:image/png;base64,{{ result.price_img }}" class="img-fluid mb-3">
+
+  <h5>Equity Curve</h5>
+  <img src="data:image/png;base64,{{ result.equity_img }}" class="img-fluid mb-3">
+
+  <h5>Spread vs Z-score</h5>
+  <img src="data:image/png;base64,{{ result.spread_img }}" class="img-fluid mb-3">
+
+  <div class="text-center mt-4">
+    <a href="/" class="btn btn-secondary">Back</a>
+  </div>
+</div>
+{% else %}
+
+<div class="card shadow-sm p-4 mx-auto" style="max-width:650px;">
+  <h3 class="mb-4 text-center">Run Pair-Trade Strategy</h3>
 
   <form method="POST" class="row g-3">
     <div class="col-md-6">
@@ -38,31 +68,6 @@
       </button>
     </div>
   </form>
-</div>
-
-
-{% if result %}
-<div class="card p-4 mt-4">
-  <h4>📊 Pair Trading Results</h4>
-
-  <div class="row text-center mt-3 mb-3">
-    <div class="col-md-2"><b>Sharpe</b><br>{{ result.stats.sharpe|round(3) }}</div>
-    <div class="col-md-2"><b>Return</b><br>{{ result.stats.total_return|round(3) }}</div>
-    <div class="col-md-2"><b>Drawdown</b><br>{{ result.stats.max_drawdown|round(3) }}</div>
-    <div class="col-md-2"><b>Accuracy</b><br>{{ result.model_accuracy|round(3) }}</div>
-    <div class="col-md-2"><b>β Hedge</b><br>{{ result.beta|round(3) }}</div>
-  </div>
-
-  <hr>
-
-  <h5 class="mt-3">Price Chart</h5>
-  <img src="data:image/png;base64,{{ result.price_img }}" class="img-fluid rounded shadow">
-
-  <h5 class="mt-4">Equity Curve</h5>
-  <img src="data:image/png;base64,{{ result.equity_img }}" class="img-fluid rounded shadow">
-
-  <h5 class="mt-4">Spread vs Z-score</h5>
-  <img src="data:image/png;base64,{{ result.spread_img }}" class="img-fluid rounded shadow">
 </div>
 {% endif %}
 
