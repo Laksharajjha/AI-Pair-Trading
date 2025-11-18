@@ -1,48 +1,69 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card shadow-sm p-4">
+<div class="card shadow-sm p-4 mb-4" style="max-width: 800px; margin:auto;">
+  <h3 class="mb-3">📊 Run Single Pair Strategy</h3>
 
-  <h3 class="fw-bold mb-3">📊 Pair Trading Results</h3>
-  <h6 class="text-muted">{{ ticker1 }} / {{ ticker2 }}</h6>
+  <form method="POST" class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label fw-semibold">Ticker 1</label>
+      <input class="form-control" name="ticker1" value="AAPL">
+    </div>
 
-  <div class="row text-center my-3">
-    <div class="col">
-      <div class="fw-bold">Sharpe</div>
-      <div>{{ sharpe }}</div>
+    <div class="col-md-6">
+      <label class="form-label fw-semibold">Ticker 2</label>
+      <input class="form-control" name="ticker2" value="MSFT">
     </div>
-    <div class="col">
-      <div class="fw-bold">Return</div>
-      <div>{{ total_return }}</div>
+
+    <div class="col-md-6">
+      <label class="form-label">Period</label>
+      <select name="period" class="form-select">
+        <option value="3mo">3 Months</option>
+        <option value="6mo" selected>6 Months</option>
+        <option value="1y">1 Year</option>
+      </select>
     </div>
-    <div class="col">
-      <div class="fw-bold">Drawdown</div>
-      <div>{{ max_drawdown }}</div>
+
+    <div class="col-md-6">
+      <label class="form-label">Interval</label>
+      <select name="interval" class="form-select">
+        <option value="1d">Daily</option>
+        <option value="1wk">Weekly</option>
+      </select>
     </div>
-    <div class="col">
-      <div class="fw-bold">Accuracy</div>
-      <div>{{ model_accuracy }}</div>
+
+    <div class="col-12 text-center mt-3">
+      <button class="btn btn-primary px-4 py-2">
+        Run Strategy 🚀
+      </button>
     </div>
-    <div class="col">
-      <div class="fw-bold">β Hedge</div>
-      <div>{{ beta }}</div>
-    </div>
+  </form>
+</div>
+
+
+{% if result %}
+<div class="card p-4 mt-4">
+  <h4>📊 Pair Trading Results</h4>
+
+  <div class="row text-center mt-3 mb-3">
+    <div class="col-md-2"><b>Sharpe</b><br>{{ result.stats.sharpe|round(3) }}</div>
+    <div class="col-md-2"><b>Return</b><br>{{ result.stats.total_return|round(3) }}</div>
+    <div class="col-md-2"><b>Drawdown</b><br>{{ result.stats.max_drawdown|round(3) }}</div>
+    <div class="col-md-2"><b>Accuracy</b><br>{{ result.model_accuracy|round(3) }}</div>
+    <div class="col-md-2"><b>β Hedge</b><br>{{ result.beta|round(3) }}</div>
   </div>
 
   <hr>
 
-  <h5 class="fw-semibold">Price Chart</h5>
-  <img class="img-fluid rounded mb-4" src="data:image/png;base64,{{ price_img }}"/>
+  <h5 class="mt-3">Price Chart</h5>
+  <img src="data:image/png;base64,{{ result.price_img }}" class="img-fluid rounded shadow">
 
-  <h5 class="fw-semibold">Equity Curve</h5>
-  <img class="img-fluid rounded mb-4" src="data:image/png;base64,{{ equity_img }}"/>
+  <h5 class="mt-4">Equity Curve</h5>
+  <img src="data:image/png;base64,{{ result.equity_img }}" class="img-fluid rounded shadow">
 
-  <h5 class="fw-semibold">Spread vs Z-score</h5>
-  <img class="img-fluid rounded" src="data:image/png;base64,{{ spread_img }}"/>
-
-  <hr>
-
-  <a href="/" class="btn btn-primary mt-3">Run Another Strategy</a>
+  <h5 class="mt-4">Spread vs Z-score</h5>
+  <img src="data:image/png;base64,{{ result.spread_img }}" class="img-fluid rounded shadow">
 </div>
+{% endif %}
 
 {% endblock %}
