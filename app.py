@@ -110,7 +110,7 @@ def run_single():
             price_img=r["price_img"],
             equity_img=r["equity_img"],
             spread_img=r["spread_img"],
-            beta=round(r["beta"], 3),
+            beta=round(float(r["beta"]), 3),
         )
 
     # GET request — show input UI

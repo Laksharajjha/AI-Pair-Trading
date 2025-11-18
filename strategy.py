@@ -54,7 +54,7 @@ def compute_hedge_ratio(df):
     x = df["p2"].values.reshape(-1, 1)
     y = df["p1"].values
     beta = (x.T @ y) / (x.T @ x)[0]
-    return beta
+    return float(beta)
 
 def build_features(df, beta, lookback=20, horizon=5):
     spread = df["p1"] - beta * df["p2"]
