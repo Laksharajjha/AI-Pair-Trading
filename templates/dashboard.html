@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card p-4 shadow-sm" style="max-width:500px; margin:auto;">
+  <h3>Welcome {{ user }}!</h3>
+  <p>You are logged in. More features coming soon.</p>
+  <a href="/" class="btn btn-primary mt-2 w-100">Run Strategy</a>
+  <a href="/logout" class="btn btn-outline-danger mt-2 w-100">Logout</a>
+</div>
+
+{% endblock %}
