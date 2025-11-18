@@ -2,29 +2,47 @@
 {% block content %}
 
 <div class="card shadow-sm p-4">
-  <h3 class="mb-3">Strategy Results</h3>
 
-  <div class="mb-3"><b>Model Accuracy:</b> {{ model_accuracy }}</div>
-  <div class="mb-3"><b>β Hedge Ratio:</b> {{ beta }}</div>
+  <h3 class="fw-bold mb-3">📊 Pair Trading Results</h3>
+  <h6 class="text-muted">{{ ticker1 }} / {{ ticker2 }}</h6>
 
-  <ul>
-    <li><b>Total Return:</b> {{ stats.total_return }}</li>
-    <li><b>Sharpe:</b> {{ stats.sharpe }}</li>
-    <li><b>Max Drawdown:</b> {{ stats.max_drawdown }}</li>
-  </ul>
+  <div class="row text-center my-3">
+    <div class="col">
+      <div class="fw-bold">Sharpe</div>
+      <div>{{ sharpe }}</div>
+    </div>
+    <div class="col">
+      <div class="fw-bold">Return</div>
+      <div>{{ total_return }}</div>
+    </div>
+    <div class="col">
+      <div class="fw-bold">Drawdown</div>
+      <div>{{ max_drawdown }}</div>
+    </div>
+    <div class="col">
+      <div class="fw-bold">Accuracy</div>
+      <div>{{ model_accuracy }}</div>
+    </div>
+    <div class="col">
+      <div class="fw-bold">β Hedge</div>
+      <div>{{ beta }}</div>
+    </div>
+  </div>
 
   <hr>
 
-  <h5>Price Chart</h5>
-  <img class="img-fluid" src="data:image/png;base64,{{ price_img }}"/>
+  <h5 class="fw-semibold">Price Chart</h5>
+  <img class="img-fluid rounded mb-4" src="data:image/png;base64,{{ price_img }}"/>
 
-  <h5 class="mt-4">Equity Curve</h5>
-  <img class="img-fluid" src="data:image/png;base64,{{ equity_img }}"/>
+  <h5 class="fw-semibold">Equity Curve</h5>
+  <img class="img-fluid rounded mb-4" src="data:image/png;base64,{{ equity_img }}"/>
 
-  <h5 class="mt-4">Spread vs Z-Score</h5>
-  <img class="img-fluid" src="data:image/png;base64,{{ spread_img }}"/>
+  <h5 class="fw-semibold">Spread vs Z-score</h5>
+  <img class="img-fluid rounded" src="data:image/png;base64,{{ spread_img }}"/>
 
-  <a href="/" class="btn btn-primary mt-3">← Back</a>
+  <hr>
+
+  <a href="/" class="btn btn-primary mt-3">Run Another Strategy</a>
 </div>
 
 {% endblock %}

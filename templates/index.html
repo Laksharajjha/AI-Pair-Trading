@@ -2,22 +2,20 @@
 {% block content %}
 
 <div class="card shadow-sm p-4 mb-4">
-  <h3 class="mb-3">📊 Quant Pairs Backtesting Platform</h3>
+  <h3 class="mb-3 fw-bold">📈 Quant Backtesting Platform</h3>
 
   {% if error %}
   <div class="alert alert-danger">{{ error }}</div>
   {% endif %}
 
-  <form method="POST" action="/backtest" class="mb-4">
-    <div class="mb-3">
-      <label class="form-label fw-bold">Pairs (one per line: TICKER1,TICKER2)</label>
-      <textarea class="form-control" name="pairs" rows="4" placeholder="AAPL,MSFT&#10;GOOG,META"></textarea>
-      <small class="text-muted">US Stocks Only — for now!</small>
-    </div>
+  <form method="POST" class="mb-4">
+    <label class="form-label fw-semibold">Pairs (one per line)</label>
+    <textarea class="form-control mb-3" name="pairs" rows="4"
+      placeholder="AAPL,MSFT&#10;GOOG,META"></textarea>
 
-    <div class="row mb-3">
+    <div class="row g-3">
       <div class="col-md-3">
-        <label class="form-label fw-bold">Strategy Type</label>
+        <label class="form-label">Strategy Type</label>
         <select class="form-select" name="strategy_type">
           <option value="ml">ML + Z-score</option>
           <option value="zscore">Pure Z-score</option>
@@ -25,55 +23,60 @@
       </div>
 
       <div class="col-md-2">
-        <label class="form-label fw-bold">Z Entry</label>
+        <label class="form-label">Z-entry</label>
         <input class="form-control" name="z_entry" placeholder="1.0">
       </div>
 
       <div class="col-md-2">
-        <label class="form-label fw-bold">Prob Threshold</label>
+        <label class="form-label">Prob Threshold</label>
         <input class="form-control" name="prob_threshold" placeholder="0.6">
       </div>
 
       <div class="col-md-2">
-        <label class="form-label fw-bold">Lookback</label>
+        <label class="form-label">Lookback</label>
         <input class="form-control" name="lookback" placeholder="20">
       </div>
 
       <div class="col-md-2">
-        <label class="form-label fw-bold">Horizon</label>
+        <label class="form-label">Horizon</label>
         <input class="form-control" name="horizon" placeholder="5">
       </div>
     </div>
 
-    <button class="btn btn-primary">🚀 Run Backtest</button>
-    <a href="/strategies" class="btn btn-outline-secondary ms-2">📁 Saved Strategies</a>
+    <div class="mt-4">
+      <button class="btn btn-primary">Run Backtest 🚀</button>
+      <a href="/strategies" class="btn btn-outline-secondary ms-2">Saved Strategies</a>
+    </div>
   </form>
+
 
   {% if portfolio %}
   <div class="alert alert-info">
-    <b>📈 Portfolio Return:</b> {{ portfolio.portfolio_return }} |
-    <b>📊 Avg Sharpe:</b> {{ portfolio.avg_sharpe }}
+    <b>Portfolio Return:</b> {{ portfolio.portfolio_return }}
+    &nbsp;|&nbsp;
+    <b>Avg Sharpe:</b> {{ portfolio.avg_sharpe }}
   </div>
   {% endif %}
 
-  {% if results %}
-  <div class="d-flex justify-content-between align-items-center my-2">
-    <h5 class="m-0">Backtest Results</h5>
-    <a href="/export_csv" class="btn btn-sm btn-success">⬇ Download CSV</a>
+
+  {% if results and results|length > 0 %}
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="fw-bold mb-0">Backtest Results</h5>
+    <a href="/export_csv" class="btn btn-sm btn-success">Download CSV</a>
   </div>
 
   <div class="table-responsive">
-    <table class="table table-hover table-sm align-middle">
-      <thead>
+    <table class="table table-striped table-hover table-sm align-middle">
+      <thead class="table-dark">
         <tr>
           <th>Ticker 1</th>
           <th>Ticker 2</th>
           <th>Sharpe</th>
           <th>Total Return</th>
-          <th>Max DD</th>
-          <th>ML Accuracy</th>
+          <th>Max Drawdown</th>
+          <th>Model Accuracy</th>
           <th>Trades</th>
-          <th>Status</th>
+          <th>Error</th>
         </tr>
       </thead>
       <tbody>
@@ -86,51 +89,40 @@
           <td>{{ r.max_drawdown }}</td>
           <td>{{ r.model_accuracy }}</td>
           <td>{{ r.n_trades }}</td>
-          <td>
-            {% if r.error %}
-              <span class="badge bg-danger">{{ r.error }}</span>
-            {% else %}
-              <span class="badge bg-success">OK</span>
-            {% endif %}
-          </td>
+          <td>{{ r.error if r.error is defined }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <hr>
+  <hr class="my-4">
 
-  <h5 class="mt-4">💾 Save Strategy</h5>
+  <h5 class="fw-bold">💾 Save Strategy Configuration</h5>
   <form method="POST" action="/save_strategy" class="row g-2">
     <div class="col-md-3">
-      <input class="form-control" name="strategy_name" placeholder="Strategy Name">
+      <input class="form-control" name="strategy_name" placeholder="Name">
     </div>
-
     <div class="col-md-2">
-      <input class="form-control" name="strategy_type" placeholder="ml or zscore">
+      <input class="form-control" name="strategy_type" placeholder="ml | zscore">
     </div>
-
     <div class="col-md-2">
-      <input class="form-control" name="z_entry" placeholder="Z-entry">
+      <input class="form-control" name="z_entry" placeholder="Z">
     </div>
-
     <div class="col-md-2">
-      <input class="form-control" name="prob_threshold" placeholder="Prob Thresh">
+      <input class="form-control" name="prob_threshold" placeholder="p">
     </div>
-
     <div class="col-md-1">
-      <input class="form-control" name="lookback" placeholder="20">
+      <input class="form-control" name="lookback" placeholder="L">
     </div>
-
     <div class="col-md-1">
-      <input class="form-control" name="horizon" placeholder="5">
+      <input class="form-control" name="horizon" placeholder="H">
     </div>
-
     <div class="col-md-1">
-      <button class="btn btn-sm btn-outline-primary w-100">Save</button>
+      <button class="btn btn-sm btn-outline-primary w-100" type="submit">Save</button>
     </div>
   </form>
+
   {% endif %}
 </div>
 

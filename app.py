@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, redirect, session, make_respo
 from flask_bcrypt import Bcrypt
 from functools import wraps
 from db import users_col, strategies_col
-from strategy import run_backtest, run_strategy
-import os, io, csv
+from strategy import run_backtest
+import os
+import io
+import csv
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -11,7 +13,7 @@ bcrypt = Bcrypt(app)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret")
 
 
-# -------- AUTH GUARD --------
+# ---------- AUTH GUARD ----------
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -21,27 +23,33 @@ def login_required(f):
     return wrapper
 
 
-# -------- HOME + BATCH BACKTEST --------
+# ---------- HOME + BATCH BACKTEST ----------
 @app.route("/", methods=["GET", "POST"])
-@login_required
 def index():
     if request.method == "POST":
+        # Require login only when actually running backtests
+        if "user" not in session:
+            return redirect("/login")
+
         pairs_raw = request.form.get("pairs", "").strip()
-
         if not pairs_raw:
-            return render_template("index.html", results=[], error="No pairs provided")
+            return render_template(
+                "index.html",
+                results=[],
+                error="Please enter at least one pair."
+            )
 
-        pairs = [p.split(",") for p in pairs_raw.splitlines() if "," in p]
+        pairs = [p for p in pairs_raw.splitlines() if "," in p]
 
-        results = []
         strategy_type = request.form.get("strategy_type", "ml")
         z_entry = float(request.form.get("z_entry") or 1.0)
         prob_threshold = float(request.form.get("prob_threshold") or 0.6)
         lookback = int(request.form.get("lookback") or 20)
         horizon = int(request.form.get("horizon") or 5)
 
-        for t1, t2 in pairs:
-            t1, t2 = t1.strip(), t2.strip()
+        results = []
+        for line in pairs:
+            t1, t2 = [x.strip() for x in line.split(",")]
             try:
                 out = run_backtest(
                     t1,
@@ -57,34 +65,41 @@ def index():
                 results.append({
                     "ticker1": t1,
                     "ticker2": t2,
+                    "sharpe": None,
+                    "total_return": None,
+                    "max_drawdown": None,
+                    "model_accuracy": None,
+                    "n_trades": None,
                     "error": str(e)
                 })
 
-        # portfolio stats
-        valid = [r for r in results if "total_return" in r]
-        portfolio_return = sum(r["total_return"] for r in valid)
-        avg_sharpe = (
-            sum(r["sharpe"] for r in valid) / len(valid)
-            if len(valid) > 0 else 0
-        )
+        valid = [r for r in results if r.get("total_return") is not None]
+        if valid:
+            portfolio_return = sum(r["total_return"] for r in valid)
+            avg_sharpe = sum(r["sharpe"] for r in valid) / len(valid)
+        else:
+            portfolio_return = 0.0
+            avg_sharpe = 0.0
 
-        # store for CSV export
+        # store in session for CSV export
         session["last_results"] = results
 
         return render_template(
             "index.html",
             results=results,
-            portfolio={"portfolio_return": portfolio_return, "avg_sharpe": avg_sharpe}
+            portfolio={"portfolio_return": round(portfolio_return, 3),
+                       "avg_sharpe": round(avg_sharpe, 3)}
         )
 
-    return render_template("index.html")
+    # GET: just render empty page
+    return render_template("index.html", results=None, portfolio=None)
+    
 
-
-# -------- SIGNUP --------
+# ---------- SIGNUP ----------
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        email = request.form["email"]
+        email = request.form["email"].strip().lower()
         password = request.form["password"]
 
         if users_col.find_one({"email": email}):
@@ -98,11 +113,11 @@ def signup():
     return render_template("signup.html")
 
 
-# -------- LOGIN --------
+# ---------- LOGIN ----------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form["email"]
+        email = request.form["email"].strip().lower()
         password = request.form["password"]
 
         user = users_col.find_one({"email": email})
@@ -118,7 +133,7 @@ def login():
     return render_template("login.html")
 
 
-# -------- LOGOUT --------
+# ---------- LOGOUT ----------
 @app.route("/logout")
 @login_required
 def logout():
@@ -126,7 +141,7 @@ def logout():
     return redirect("/login")
 
 
-# -------- SAVE STRATEGY --------
+# ---------- SAVE STRATEGY CONFIG ----------
 @app.route("/save_strategy", methods=["POST"])
 @login_required
 def save_strategy():
@@ -137,13 +152,12 @@ def save_strategy():
         "z_entry": request.form.get("z_entry"),
         "prob_threshold": request.form.get("prob_threshold"),
         "lookback": request.form.get("lookback"),
-        "horizon": request.form.get("horizon"),
+        "horizon": request.form.get("horizon")
     })
-
     return redirect("/strategies")
 
 
-# -------- VIEW SAVED STRATEGIES --------
+# ---------- VIEW SAVED STRATEGIES ----------
 @app.route("/strategies")
 @login_required
 def strategies():
@@ -151,18 +165,18 @@ def strategies():
     return render_template("saved.html", strategies=rows)
 
 
-# -------- EXPORT CSV --------
+# ---------- EXPORT CSV ----------
 @app.route("/export_csv")
 @login_required
 def export_csv():
     results = session.get("last_results", [])
     if not results:
-        return "No results", 400
+        return "No results to export", 400
 
     si = io.StringIO()
     writer = csv.writer(si)
-    writer.writerow(["Ticker1", "Ticker2", "Sharpe", "Return", "Drawdown", "Accuracy", "Trades"])
-
+    writer.writerow(["Ticker1", "Ticker2", "Sharpe", "TotalReturn",
+                     "MaxDrawdown", "ModelAccuracy", "Trades", "Error"])
     for r in results:
         writer.writerow([
             r.get("ticker1"),
@@ -172,15 +186,16 @@ def export_csv():
             r.get("max_drawdown"),
             r.get("model_accuracy"),
             r.get("n_trades"),
+            r.get("error")
         ])
 
     output = make_response(si.getvalue())
-    output.headers["Content-Disposition"] = "attachment; filename=results.csv"
-    output.headers["Content-type"] = "text/csv"
+    output.headers["Content-Disposition"] = "attachment; filename=backtest_results.csv"
+    output.headers["Content-Type"] = "text/csv"
     return output
 
 
-# -------- HEALTH CHECK --------
+# ---------- HEALTH ----------
 @app.route("/health")
 def health():
     return "ok", 200
