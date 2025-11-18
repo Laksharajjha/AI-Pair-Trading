@@ -128,9 +128,50 @@ def run_single():
 
 
 # ---------- LIVE SIGNALS (placeholder) ----------
-@app.route("/live")
+@app.route("/live", methods=["GET", "POST"])
 @login_required
 def live():
+    if request.method == "POST":
+        t1 = request.form.get("ticker1", "AAPL")
+        t2 = request.form.get("ticker2", "MSFT")
+
+        try:
+            df = fetch_data(t1, t2)
+            beta = compute_hedge_ratio(df)
+
+            # only last values
+            p1 = df["p1"].iloc[-1]
+            p2 = df["p2"].iloc[-1]
+
+            spread = p1 - beta * p2
+
+            # simple z-score calc
+            spread_series = df["p1"] - beta * df["p2"]
+            z = (spread - spread_series.mean()) / spread_series.std()
+
+            # trading rule
+            if z > 1:
+                sig = "SELL"
+            elif z < -1:
+                sig = "BUY"
+            else:
+                sig = "WAIT"
+
+            return render_template(
+                "live.html",
+                ticker1=t1,
+                ticker2=t2,
+                signal=sig,
+                zscore=round(z, 3),
+                spread=round(spread, 3),
+            )
+
+        except Exception as e:
+            return render_template(
+                "live.html",
+                error=str(e)
+            )
+
     return render_template("live.html")
 
 

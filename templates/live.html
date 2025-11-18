@@ -1,28 +1,71 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card p-4">
-  <h3 class="mb-3">Live Trading Signals</h3>
+<div class="card shadow-sm p-4 mx-auto" style="max-width: 650px;">
+  <h3 class="mb-3 text-center">📡 Live Pair Signals</h3>
 
-  <form method="GET" action="/live">
-    <div class="row g-3">
-      <div class="col-md-5">
-        <input class="form-control" name="t1" placeholder="Ticker 1" value="{{ request.args.get('t1','AAPL') }}">
-      </div>
-      <div class="col-md-5">
-        <input class="form-control" name="t2" placeholder="Ticker 2" value="{{ request.args.get('t2','MSFT') }}">
-      </div>
-      <div class="col-md-2">
-        <button class="btn btn-primary w-100">Load</button>
-      </div>
+  <form class="row g-3" method="POST" action="/live">
+    <div class="col-md-6">
+      <label class="form-label fw-semibold">Ticker 1</label>
+      <input class="form-control" name="ticker1" value="{{ ticker1 or 'AAPL' }}" required>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label fw-semibold">Ticker 2</label>
+      <input class="form-control" name="ticker2" value="{{ ticker2 or 'MSFT' }}" required>
+    </div>
+
+    <div class="col-12 text-center mt-2">
+      <button class="btn btn-primary px-4 py-2">Update Signal ⚡</button>
     </div>
   </form>
-
-  <hr>
-
-  <div class="text-muted">
-    Live signals coming soon (Kafka / Websockets ready)
-  </div>
 </div>
+
+
+{% if signal %}
+<hr class="my-4">
+
+<div class="row g-3">
+
+  <div class="col-md-4">
+    <div class="card p-3 text-center">
+      <h6 class="text-muted">Z-Score</h6>
+      <h3>{{ zscore }}</h3>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card p-3 text-center">
+      <h6 class="text-muted">Spread</h6>
+      <h3>{{ spread }}</h3>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card p-3 text-center">
+      <h6 class="text-muted">Signal</h6>
+      <h3>
+        {% if signal == 'BUY' %}
+          <span class="text-success fw-bold">BUY 🔼</span>
+        {% elif signal == 'SELL' %}
+          <span class="text-danger fw-bold">SELL 🔽</span>
+        {% else %}
+          <span class="text-muted fw-bold">WAIT ⏳</span>
+        {% endif %}
+      </h3>
+    </div>
+  </div>
+
+</div>
+
+<p class="text-muted mt-3 text-center">
+  (Auto-refreshes every 20 seconds)
+</p>
+
+<script>
+  setTimeout(() => location.reload(), 20000);
+</script>
+
+{% endif %}
 
 {% endblock %}
