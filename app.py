@@ -102,36 +102,27 @@ def run_single():
 
             return render_template(
                 "results.html",
+                result=True,
                 ticker1=t1,
                 ticker2=t2,
-                model_accuracy=round(r["model_accuracy"], 3),
                 sharpe=round(r["stats"]["sharpe"], 3),
-                max_drawdown=round(r["stats"]["max_drawdown"], 3),
                 total_return=round(r["stats"]["total_return"], 3),
+                max_drawdown=round(r["stats"]["max_drawdown"], 3),
+                model_accuracy=round(r["model_accuracy"], 3),
                 price_img=r["price_img"],
                 equity_img=r["equity_img"],
                 spread_img=r["spread_img"],
                 beta=round(float(r["beta"]), 3),
-                error=None
             )
 
         except Exception as e:
             return render_template(
                 "results.html",
-                ticker1=t1,
-                ticker2=t2,
-                error=str(e),
-                model_accuracy=None,
-                sharpe=None,
-                max_drawdown=None,
-                total_return=None,
-                price_img=None,
-                equity_img=None,
-                spread_img=None,
-                beta=None
+                result=None,
+                error=f"Strategy failed: {str(e)}"
             )
 
-    # GET — show input form
+    # GET request → show input UI
     return render_template("run.html")
 
 
