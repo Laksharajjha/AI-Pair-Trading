@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card shadow-sm p-4">
+  <h3 class="mb-3">📁 Saved Strategies</h3>
+
+  {% if strategies|length == 0 %}
+  <div class="alert alert-warning">No saved strategies yet.</div>
+  {% else %}
+
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Z-entry</th>
+        <th>Prob</th>
+        <th>Lookback</th>
+        <th>Horizon</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in strategies %}
+      <tr>
+        <td>{{ s.name }}</td>
+        <td>{{ s.type }}</td>
+        <td>{{ s.z_entry }}</td>
+        <td>{{ s.prob_threshold }}</td>
+        <td>{{ s.lookback }}</td>
+        <td>{{ s.horizon }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <a href="/" class="btn btn-secondary mt-3">← Back</a>
+</div>
+
+{% endblock %}
