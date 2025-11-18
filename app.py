@@ -97,24 +97,41 @@ def run_single():
         period = request.form.get("period") or "6mo"
         interval = request.form.get("interval") or "1d"
 
-        print("RUN STRATEGY RESULT:", r)
-        r = run_strategy(t1, t2, period, interval)
+        try:
+            r = run_strategy(t1, t2, period, interval)
 
-        return render_template(
-            "results.html",
-            ticker1=t1,
-            ticker2=t2,
-            model_accuracy=round(r["model_accuracy"], 3),
-            sharpe=round(r["stats"]["sharpe"], 3),
-            max_drawdown=round(r["stats"]["max_drawdown"], 3),
-            total_return=round(r["stats"]["total_return"], 3),
-            price_img=r["price_img"],
-            equity_img=r["equity_img"],
-            spread_img=r["spread_img"],
-            beta=round(float(r["beta"]), 3),
-        )
+            return render_template(
+                "results.html",
+                ticker1=t1,
+                ticker2=t2,
+                model_accuracy=round(r["model_accuracy"], 3),
+                sharpe=round(r["stats"]["sharpe"], 3),
+                max_drawdown=round(r["stats"]["max_drawdown"], 3),
+                total_return=round(r["stats"]["total_return"], 3),
+                price_img=r["price_img"],
+                equity_img=r["equity_img"],
+                spread_img=r["spread_img"],
+                beta=round(float(r["beta"]), 3),
+                error=None
+            )
 
-    # GET request — show input UI
+        except Exception as e:
+            return render_template(
+                "results.html",
+                ticker1=t1,
+                ticker2=t2,
+                error=str(e),
+                model_accuracy=None,
+                sharpe=None,
+                max_drawdown=None,
+                total_return=None,
+                price_img=None,
+                equity_img=None,
+                spread_img=None,
+                beta=None
+            )
+
+    # GET — show input form
     return render_template("run.html")
 
 
