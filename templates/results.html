@@ -1,74 +1,54 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% if result %}
-<div class="card shadow-sm p-4">
-
+<div class="card shadow-sm p-4 mx-auto" style="max-width: 900px;">
   <h3 class="mb-4 text-center">📊 Pair Trading Results</h3>
 
-  <table class="table table-bordered text-center">
-    <tr><th>Sharpe</th><td>{{ result.stats.sharpe|round(3) }}</td></tr>
-    <tr><th>Return</th><td>{{ result.stats.total_return|round(3) }}</td></tr>
-    <tr><th>Drawdown</th><td>{{ result.stats.max_drawdown|round(3) }}</td></tr>
-    <tr><th>Accuracy</th><td>{{ result.model_accuracy|round(3) }}</td></tr>
-    <tr><th>β Hedge</th><td>{{ result.beta|round(3) }}</td></tr>
-  </table>
+  {% if result %}
+  <div class="row text-center mb-4">
+    <div class="col">
+      <h6>Sharpe</h6>
+      <b>{{ result.stats.sharpe | round(3) }}</b>
+    </div>
+    <div class="col">
+      <h6>Return</h6>
+      <b>{{ result.stats.total_return | round(3) }}</b>
+    </div>
+    <div class="col">
+      <h6>Drawdown</h6>
+      <b>{{ result.stats.max_drawdown | round(3) }}</b>
+    </div>
+    <div class="col">
+      <h6>Accuracy</h6>
+      <b>{{ result.model_accuracy | round(3) }}</b>
+    </div>
+    <div class="col">
+      <h6>β Hedge</h6>
+      <b>{{ result.beta | round(3) }}</b>
+    </div>
+  </div>
 
   <hr>
 
-  <h5>Price Chart</h5>
-  <img src="data:image/png;base64,{{ result.price_img }}" class="img-fluid mb-3">
+  <h5 class="mt-4">Price Chart</h5>
+  <img src="data:image/png;base64,{{ result.price_img }}" class="img-fluid mb-4">
 
   <h5>Equity Curve</h5>
-  <img src="data:image/png;base64,{{ result.equity_img }}" class="img-fluid mb-3">
+  <img src="data:image/png;base64,{{ result.equity_img }}" class="img-fluid mb-4">
 
   <h5>Spread vs Z-score</h5>
-  <img src="data:image/png;base64,{{ result.spread_img }}" class="img-fluid mb-3">
+  <img src="data:image/png;base64,{{ result.spread_img }}" class="img-fluid mb-4">
 
-  <div class="text-center mt-4">
-    <a href="/" class="btn btn-secondary">Back</a>
+  {% else %}
+  <div class="alert alert-info text-center">
+    Run a strategy to see results.
   </div>
+  {% endif %}
+
+  <div class="text-center mt-3">
+    <a href="/" class="btn btn-outline-primary">⬅ Back</a>
+  </div>
+
 </div>
-{% else %}
-
-<div class="card shadow-sm p-4 mx-auto" style="max-width:650px;">
-  <h3 class="mb-4 text-center">Run Pair-Trade Strategy</h3>
-
-  <form method="POST" class="row g-3">
-    <div class="col-md-6">
-      <label class="form-label fw-semibold">Ticker 1</label>
-      <input class="form-control" name="ticker1" value="AAPL">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label fw-semibold">Ticker 2</label>
-      <input class="form-control" name="ticker2" value="MSFT">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Period</label>
-      <select name="period" class="form-select">
-        <option value="3mo">3 Months</option>
-        <option value="6mo" selected>6 Months</option>
-        <option value="1y">1 Year</option>
-      </select>
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Interval</label>
-      <select name="interval" class="form-select">
-        <option value="1d">Daily</option>
-        <option value="1wk">Weekly</option>
-      </select>
-    </div>
-
-    <div class="col-12 text-center mt-3">
-      <button class="btn btn-primary px-4 py-2">
-        Run Strategy 🚀
-      </button>
-    </div>
-  </form>
-</div>
-{% endif %}
 
 {% endblock %}
